@@ -3,40 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalcPvAutonome Mobile</title>
+    <title>SolaExpert - ASNBNF</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        .background-logo {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('/static/logo.png');
-            background-repeat: no-repeat; background-position: center; background-size: contain;
-            opacity: 0.08; z-index: -1; pointer-events: none;
-        }
         body { font-family: -apple-system, sans-serif; margin: 0; padding: 0; padding-bottom: 120px; background-color: #f4f7f6; color: #333;}
         
         /* STYLE EN BLOCS SOLIDAIRES */
-        h2 { 
-            font-size: 1.1rem; 
-            margin: 35px 0 0 0; 
-            background-color: #2c3e50; 
-            color: white; 
-            padding: 12px 15px; 
-            border-radius: 8px 8px 0 0; 
-        }
-        
+        h2 { font-size: 1.1rem; margin: 35px 0 0 0; background-color: #2c3e50; color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; }
         .container { padding: 15px; }
-        
-        .card { 
-            background: white; 
-            padding: 15px; 
-            border-radius: 0 0 8px 8px; 
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
-            margin-bottom: 0px; 
-        }
-
+        .card { background: white; padding: 15px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 0px; }
         input, select, button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         label { font-size: 0.85rem; font-weight: bold; color: #555; display: block; margin-top: 10px; }
         button.primary { background-color: #007bff; color: white; border: none; font-weight: bold; margin-top: 10px; padding: 15px;}
@@ -55,7 +33,6 @@
         .msg-error { background-color: #fee; border-left: 4px solid #c00; color: #c00; }
         .msg-info { background-color: #e9f5ff; color: #007bff; text-align: center;}
 
-        /* Grilles pour les paramètres techniques */
         .grid-params { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-top: 10px;}
         .grid-params label { margin-top: 5px; font-size: 0.75rem;}
         .grid-params input { padding: 8px; margin: 0; text-align: center;}
@@ -63,7 +40,6 @@
         details { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-top: 10px; }
         summary { font-weight: bold; color: #2c3e50; cursor: pointer; padding: 5px 0; outline: none; }
 
-        /* Styles du schéma de câblage RESPONSIVE (Sans Slider) */
         .schema-wrapper { width: 100%; padding: 10px 0; background: #fff; border-radius: 8px; border: 1px solid #a3e4d7; margin-top: 15px; box-sizing: border-box; overflow: hidden; }
         .wiring-diagram { display: flex; flex-direction: column; align-items: center; width: 100%; font-family: -apple-system, sans-serif; }
         .bus-container { position: relative; width: 95%; border-left: 3px solid #e74c3c; border-right: 3px solid #2c3e50; padding: 10px 0; margin: 5px 0; background: #fdfdfd; border-radius: 4px; box-sizing: border-box;}
@@ -88,24 +64,26 @@
         .synthesis-card h3 { color: #1e8449; margin-bottom: 5px;}
         .result-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 5px 0; font-size: 0.9rem;}
         .result-row strong { color: #2c3e50; }
-        
         .bg-resultat { background-color: #4caf50; color: white;}
     </style>
 </head>
 <body>
-<header style="background: linear-gradient(135deg, #2c3e50, #1a252f); color: white; padding: 20px 15px; text-align: center; border-bottom: 4px solid #27ae60; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-    <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Calculateur Solaire</h1>
-    <div style="margin-top: 10px; font-size: 0.7rem; color: #bdc3c7; border-top: 1px solid #3e5871; padding-top: 5px;">
-        Propulsé par <strong>Orbivia</strong> pour l'association <strong>ASNBNF</strong>
-    </div>
-</header>
+    <header style="background: linear-gradient(135deg, #2c3e50, #1a252f); color: white; padding: 20px 15px; text-align: center; border-bottom: 4px solid #27ae60; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">SolaExpert ASNBNF</h1>
+        <p style="margin: 5px 0 0 0; font-size: 0.85rem; opacity: 0.9;">Calculateur Solaire Autonome</p>
+        <div style="margin-top: 10px; font-size: 0.7rem; color: #bdc3c7; border-top: 1px solid #3e5871; padding-top: 5px;">
+            Propulsé par <strong>Orbivia</strong> pour l'association <strong>ASNBNF</strong>
+        </div>
+    </header>
+
     <div class="container">
-        <h2> 1. Localisation & Ensoleillement</h2>
+        <h2>📍 1. Localisation & Ensoleillement</h2>
         <div class="card">
             <p style="font-size: 0.8rem; color: #666; margin-top: 0;">Touchez la carte pour récupérer l'ensoleillement local.</p>
             <div id="map"></div>
             
             <div id="apiErrorMsg" class="msg-box msg-error"></div>
+            <p style="font-size: 0.7rem; color: #7f8c8d; text-align: right; margin-top: -5px; margin-bottom: 15px;">Source des données : <strong>API PVGIS</strong> (Commission Européenne)</p>
             
             <label>Stratégie de dimensionnement</label>
             <select id="strategie" onchange="changerStrategie()">
@@ -116,26 +94,47 @@
             <label>Irradiation journalière de référence (Wh/m²)</label>
             <input type="number" id="irradiation" value="4597" onchange="calculerTotal()">
             
+            <div style="background: #e9ecef; padding: 10px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #3498db;">
+                <label style="display: flex; align-items: center; cursor: pointer; margin-top:0; font-size: 0.9rem; color: #2c3e50;">
+                    <input type="checkbox" id="opti_orientation" checked onchange="gererOrientation()" style="width: auto; margin: 0 10px 0 0;">
+                    Optimiser l'orientation (Plein Sud / Inclinaison idéale)
+                </label>
+                
+                <p id="msg_orientation" style="font-size: 0.75rem; color: #27ae60; margin: 5px 0 0 25px;">
+                    ✓ Le facteur de rendement (F) est maintenu à 1.00.
+                </p>
+
+                <div id="bloc_orientation_manuelle" style="display: none; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;">
+                    <p style="font-size: 0.75rem; color: #e67e22; margin-top: 0;"><strong>Mode pédagogique :</strong> Une orientation non optimale dégrade le rendement (Facteur F estimé ici à 0.90).</p>
+                    <div class="grid-params" style="background: transparent; border: none; padding: 0; margin-top: 5px;">
+                        <div><label>Inclinaison (°)</label><input type="number" id="inclinaison_manuelle" value="15"></div>
+                        <div><label>Orientation (Azimut °)</label><input type="number" id="orientation_manuelle" value="0"></div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="chart-container" id="chartContainer">
                 <canvas id="solarChart"></canvas>
             </div>
             <p id="loadingMsg" class="msg-box msg-info">Récupération des données solaires...</p>
         </div>
 
-        <h2> 2. Bilan de consommation</h2>
+        <h2>💡 2. Bilan de consommation</h2>
         <div class="card">
             <label>Choisir un équipement type</label>
             <select id="typeEq" onchange="majChampsEquipement()">
                 <option value="Ampoule Led|10">💡 Ampoule Led (10W)</option>
                 <option value="Néon 120 cm|18">💡 Néon 120 cm (18W)</option>
                 <option value="Chargeur Téléphone|5">📱 Chargeur Téléphone (5W)</option>
+                <option value="Ventilateur de plafond|60">🌀 Ventilateur de plafond (60W)</option>
+                <option value="Ventilateur sur pied|45">🌀 Ventilateur sur pied (45W)</option>
                 <option value="Frigo top|80">❄️ Frigo top (80W)</option>
                 <option value="Congélateur|150">🧊 Congélateur (150W)</option>
                 <option value="Ordinateur|65">💻 Ordinateur (65W)</option>
                 <option value="Téléviseur|60">📺 Téléviseur (60W)</option>
+                <option value="Pompe à eau|150">💧 Pompe à eau (150W)</option>
+                <option value="Spot château d'eau|60">🔦 Spot château d'eau (60W)</option>
                 <option value="Prises diverses|50">🔌 Prises diverses (50W)</option>
-                <option value="Ventilateur de plafond|60">🌀 Ventilateur de plafond (60W)</option>
-                <option value="Ventilateur sur pied|45">🌀 Ventilateur sur pied (45W)</option>
                 <option value="Autre|0">✏️ Autre équipement (manuel)</option>
             </select>
 
@@ -163,7 +162,7 @@
                 </div>
             </div>
             
-            <button class="primary" onclick="ajouterEquipement()"> Ajouter l'équipement</button>
+            <button class="primary" onclick="ajouterEquipement()">➕ Ajouter l'équipement</button>
             <div id="listeEquipements" style="margin-top: 15px;"></div>
             
             <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
@@ -172,9 +171,8 @@
             </div>
         </div>
 
-        <h2> 3. Paramètres Techniques</h2>
+        <h2>⚙️ 3. Paramètres Techniques</h2>
         <div class="card">
-            
             <details open>
                 <summary>Rendements du système</summary>
                 <div class="grid-params">
@@ -231,10 +229,9 @@
                     <div style="grid-column: span 2;"><label>Distance Onduleur ➔ Batterie (m)</label><input type="number" id="c_dist_ob" value="1" onchange="calculerTotal()"></div>
                 </div>
             </details>
-
         </div>
 
-        <h2 class="synthesis-title"> 4. Synthèse et Dimensionnement</h2>
+        <h2 class="synthesis-title">📊 4. Synthèse et Dimensionnement</h2>
         <div class="card synthesis-card">
             
             <h3>Production requise</h3>
@@ -264,7 +261,7 @@
 
             <h3 style="margin-top: 25px; border-top: 2px dashed #a3e4d7; padding-top: 15px;">🔌 Schéma de principe unifilaire</h3>
             <div class="schema-container" id="schema-box" style="border: 1px solid #a3e4d7; padding:10px; background:white; border-radius:8px;">
-                <!-- Généré dynamiquement en JS -->
+                <span style="color:#888; font-style:italic;">Le schéma sera généré dès que vous ajouterez des équipements.</span>
             </div>
         </div>
 
@@ -303,6 +300,7 @@
             errorMsg.style.display = 'none';
             
             try {
+                // Call the PVGIS API via our Python Flask server
                 const response = await fetch(`/get_solar_data?lat=${lat}&lon=${lng}`);
                 
                 if (!response.ok) {
@@ -343,6 +341,26 @@
             }
             
             document.getElementById('irradiation').value = Math.round(valReference);
+            calculerTotal();
+        }
+
+        function gererOrientation() {
+            const estOptimise = document.getElementById('opti_orientation').checked;
+            const blocManuel = document.getElementById('bloc_orientation_manuelle');
+            const msgOpti = document.getElementById('msg_orientation');
+            const champRendementInclinaison = document.getElementById('r_inclinaison');
+
+            if (estOptimise) {
+                blocManuel.style.display = 'none';
+                msgOpti.style.display = 'block';
+                champRendementInclinaison.value = "1.00";
+                champRendementInclinaison.style.backgroundColor = ""; 
+            } else {
+                blocManuel.style.display = 'block';
+                msgOpti.style.display = 'none';
+                champRendementInclinaison.value = "0.90"; 
+                champRendementInclinaison.style.backgroundColor = "#fff3cd"; 
+            }
             calculerTotal();
         }
 
@@ -395,7 +413,7 @@
             const h = parseFloat(document.getElementById('hEq').value) || 0;
             let hNuit = parseFloat(document.getElementById('hNuitEq').value) || 0;
 
-            if (hNuit > h) hNuit = h; // Sécurité : la nuit ne dépasse pas le total
+            if (hNuit > h) hNuit = h;
             document.getElementById('hNuitEq').value = hNuit;
 
             equipements.push({ 
@@ -471,7 +489,7 @@
             const tension_sys = parseFloat(document.getElementById('b_tension_sys').value) || 48;
             const tension_bat_unitaire = parseFloat(document.getElementById('b_tension_unitaire').value) || 12;
             
-            // L'énergie à stocker couvre le plus critique entre : passer la nuit OU survivre aux jours nuageux (autonomie totale)
+            // L'énergie à stocker couvre le plus critique entre : passer la nuit OU survivre aux jours nuageux
             let energie_stockage = Math.max(conso_nuit, conso * jours_autonomie);
             
             let capa_batterie = energie_stockage / (tension_sys * profondeur_decharge * r_bat);
@@ -501,7 +519,7 @@
             sec_po = sections_commerciales.find(s => s >= sec_po) || sec_po;
             sec_ob = sections_commerciales.find(s => s >= sec_ob) || sec_ob;
 
-            // Mise à jour de l'affichage (Sticky Footer + Tableau)
+            // Mise à jour de l'affichage
             document.getElementById('res-conso').innerText = Math.round(conso) + " Wh/j";
             document.getElementById('res-stockage').innerText = Math.round(capa_batterie_endommagement) + " Ah";
             document.getElementById('res-crete').innerText = Math.round(p_crete) + " Wc";
@@ -625,6 +643,7 @@
         
         window.onload = function() {
             majChampsEquipement();
+            gererOrientation();
         };
     </script>
 </body>
