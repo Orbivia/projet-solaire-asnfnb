@@ -11,14 +11,14 @@
     <style>
         body { font-family: -apple-system, sans-serif; margin: 0; padding: 0; padding-bottom: 120px; background-color: #f4f7f6; color: #333;}
         
-        h2 { font-size: 1.1rem; margin: 35px 0 0 0; background-color: #2c3e50; color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; }
+        h2 { font-size: 1.1rem; margin: 30px 0 0 0; background-color: #2c3e50; color: white; padding: 12px 15px; border-radius: 8px 8px 0 0; }
         .container { padding: 15px; }
         .card { background: white; padding: 15px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 0px; }
         input, select, button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         label { font-size: 0.85rem; font-weight: bold; color: #555; display: block; margin-top: 10px; }
         button.primary { background-color: #007bff; color: white; border: none; font-weight: bold; margin-top: 10px; padding: 15px;}
         
-        #map { height: 200px; border-radius: 8px; margin-bottom: 10px; z-index: 1;}
+        #map { height: 180px; border-radius: 8px; margin-bottom: 5px; z-index: 1;}
         .eq-card { background: #e9f5ff; padding: 10px; border-radius: 8px; margin-bottom: 5px; position: relative; border-left: 4px solid #007bff; }
         .btn-delete { position: absolute; top: 10px; right: 10px; background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 5px 10px; width: auto; }
 
@@ -26,15 +26,15 @@
         .sticky-footer div { text-align: center; font-size: 0.8rem; width: 48%; margin-bottom: 5px;}
         .sticky-footer strong { display: block; font-size: 1.1rem; color: #4CAF50; }
         .highlight { color: #ffeb3b !important; }
-        .chart-container { position: relative; height: 200px; width: 100%; margin-top: 15px; display: none; }
+        .chart-container { position: relative; height: 150px; width: 100%; margin-top: 10px; display: none; }
         
-        .msg-box { padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 0.9rem; display: none; }
+        .msg-box { padding: 10px; border-radius: 5px; margin-top: 5px; font-size: 0.9rem; display: none; }
         .msg-error { background-color: #fee; border-left: 4px solid #c00; color: #c00; }
         .msg-info { background-color: #e9f5ff; color: #007bff; text-align: center;}
 
-        .grid-params { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-top: 10px;}
+        .grid-params { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-top: 10px;}
         .grid-params label { margin-top: 5px; font-size: 0.75rem;}
-        .grid-params input { padding: 8px; margin: 0; text-align: center;}
+        .grid-params input, .grid-params select { padding: 8px; margin: 0; text-align: center; font-size: 0.9rem;}
         
         details { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-top: 10px; }
         summary { font-weight: bold; color: #2c3e50; cursor: pointer; padding: 5px 0; outline: none; }
@@ -76,51 +76,61 @@
     </header>
 
     <div class="container">
-        <h2>📍 1. Localisation & Ensoleillement</h2>
-        <div class="card">
-            <p style="font-size: 0.8rem; color: #666; margin-top: 0;">Touchez la carte pour récupérer l'ensoleillement local.</p>
-            <div id="map"></div>
+        <!-- 1. LOCALISATION ULTRA COMPACTE -->
+        <h2 style="margin-top: 10px;">📍 1. Localisation & Ensoleillement</h2>
+        <div class="card" style="padding: 12px;">
+            <div style="position: relative;">
+                <div id="map"></div>
+                <div style="font-size: 0.65rem; color: #7f8c8d; position: absolute; bottom: -18px; right: 0;">Source : <strong>API PVGIS</strong></div>
+            </div>
             
-            <div id="apiErrorMsg" class="msg-box msg-error"></div>
-            <p style="font-size: 0.7rem; color: #7f8c8d; text-align: right; margin-top: -5px; margin-bottom: 15px;">Source des données : <strong>API PVGIS</strong> (Commission Européenne)</p>
+            <div id="apiErrorMsg" class="msg-box msg-error" style="margin-top: 25px;"></div>
             
-            <label>Stratégie de dimensionnement</label>
-            <select id="strategie" onchange="changerStrategie()">
-                <option value="defavorable">Mois le plus défavorable</option>
-                <option value="moyenne">Moyenne annuelle</option>
-            </select>
-
-            <label>Irradiation journalière de référence (Wh/m²)</label>
-            <input type="number" id="irradiation" value="4597" onchange="calculerTotal()">
-            
-            <div style="background: #e9ecef; padding: 10px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #3498db;">
-                <label style="display: flex; align-items: center; cursor: pointer; margin-top:0; font-size: 0.9rem; color: #2c3e50;">
-                    <input type="checkbox" id="opti_orientation" checked onchange="gererOrientation()" style="width: auto; margin: 0 10px 0 0;">
-                    Optimiser l'orientation (Plein Sud / Inclinaison idéale)
-                </label>
-                
-                <p id="msg_orientation" style="font-size: 0.75rem; color: #27ae60; margin: 5px 0 0 25px;">
-                    ✓ Le facteur de rendement (F) est maintenu à 1.00.
-                </p>
-
-                <div id="bloc_orientation_manuelle" style="display: none; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;">
-                    <p style="font-size: 0.75rem; color: #e67e22; margin-top: 0;"><strong>Mode pédagogique :</strong> Une orientation non optimale dégrade le rendement (Facteur F estimé ici à 0.90).</p>
-                    <div class="grid-params" style="background: transparent; border: none; padding: 0; margin-top: 5px;">
-                        <div><label>Inclinaison (°)</label><input type="number" id="inclinaison_manuelle" value="15"></div>
-                        <div><label>Orientation (Azimut °)</label><input type="number" id="orientation_manuelle" value="0"></div>
-                    </div>
+            <!-- Grille compacte des 4 paramètres -->
+            <div class="grid-params" style="background: none; border: none; padding: 0; margin-top: 22px;">
+                <div>
+                    <label style="margin-top:0;">Stratégie (Mois)</label>
+                    <select id="strategie" onchange="changerStrategie()">
+                        <option value="defavorable">Défavorable</option>
+                        <option value="moyenne">Moyenne</option>
+                    </select>
                 </div>
+                <div>
+                    <label style="margin-top:0;">Irrad. (Wh/m²)</label>
+                    <input type="number" id="irradiation" value="4597" onchange="calculerTotal()">
+                </div>
+                <div>
+                    <label style="margin-top:2px;">Inclinaison (°)</label>
+                    <input type="number" id="inclinaison_manuelle" value="15" onchange="gererOrientation()">
+                </div>
+                <div>
+                    <label style="margin-top:2px;">Orientation</label>
+                    <select id="orientation_manuelle" onchange="gererOrientation()">
+                        <option value="S">Sud</option>
+                        <option value="SE">Sud-Est</option>
+                        <option value="SW">Sud-Ouest</option>
+                        <option value="E">Est</option>
+                        <option value="W">Ouest</option>
+                        <option value="NE">Nord-Est</option>
+                        <option value="NW">Nord-Ouest</option>
+                        <option value="N">Nord</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="text-align:right; font-size: 0.8rem; margin-top: 5px; color:#555;">
+                Facteur d'orientation (F) : <strong id="affichage_facteur_f" style="color:#d35400;">1.00</strong>
             </div>
             
             <div class="chart-container" id="chartContainer">
                 <canvas id="solarChart"></canvas>
             </div>
-            <p id="loadingMsg" class="msg-box msg-info">Récupération des données solaires...</p>
+            <p id="loadingMsg" class="msg-box msg-info">Calcul...</p>
         </div>
 
         <h2>💡 2. Bilan de consommation</h2>
         <div class="card">
-            <label>Choisir un équipement type</label>
+            <label style="margin-top:0;">Choisir un équipement type</label>
             <select id="typeEq" onchange="majChampsEquipement()">
                 <option value="Ampoule Led|10">💡 Ampoule Led (10W)</option>
                 <option value="Néon 120 cm|18">💡 Néon 120 cm (18W)</option>
@@ -188,7 +198,7 @@
                     <div><label>Batteries</label><input type="number" id="r_batteries" value="0.80" step="0.01" onchange="calculerTotal()"></div>
                     <div><label>Pertes Chaleur</label><input type="number" id="r_chaleur" value="0.9475" step="0.01" onchange="calculerTotal()"></div>
                     <div><label>Câbles</label><input type="number" id="r_cables" value="0.99" step="0.01" onchange="calculerTotal()"></div>
-                    <div><label>Inclinaison/Orient.</label><input type="number" id="r_inclinaison" value="1.00" step="0.01" onchange="calculerTotal()"></div>
+                    <div><label>Inclinaison/Orient.</label><input type="number" id="r_inclinaison" value="1.00" step="0.01" readonly style="background:#e9ecef;"></div>
                 </div>
                 <div style="text-align: center; margin-top: 10px; font-size: 0.9rem;">
                     Rendement global : <strong id="rendement_global_affichage" style="color: #d9534f; font-size: 1.1rem;">0.72</strong>
@@ -307,7 +317,6 @@
             errorMsg.style.display = 'none';
             
             try {
-                // Call the PVGIS API via our Python Flask server
                 const response = await fetch(`/get_solar_data?lat=${lat}&lon=${lng}`);
                 
                 if (!response.ok) {
@@ -351,23 +360,42 @@
             calculerTotal();
         }
 
-        function gererOrientation() {
-            const estOptimise = document.getElementById('opti_orientation').checked;
-            const blocManuel = document.getElementById('bloc_orientation_manuelle');
-            const msgOpti = document.getElementById('msg_orientation');
-            const champRendementInclinaison = document.getElementById('r_inclinaison');
-
-            if (estOptimise) {
-                blocManuel.style.display = 'none';
-                msgOpti.style.display = 'block';
-                champRendementInclinaison.value = "1.00";
-                champRendementInclinaison.style.backgroundColor = ""; 
-            } else {
-                blocManuel.style.display = 'block';
-                msgOpti.style.display = 'none';
-                champRendementInclinaison.value = "0.90"; 
-                champRendementInclinaison.style.backgroundColor = "#fff3cd"; 
+        function calculerFacteurF(inclinaison, orientation) {
+            let f_ori = 1.0;
+            switch(orientation) {
+                case 'S': f_ori = 1.0; break;
+                case 'SE': case 'SW': f_ori = 0.95; break;
+                case 'E': case 'W': f_ori = 0.85; break;
+                case 'NE': case 'NW': f_ori = 0.70; break;
+                case 'N': f_ori = 0.55; break;
             }
+            
+            let f_inc = 1.0;
+            if (inclinaison < 5) f_inc = 0.93; 
+            else if (inclinaison >= 5 && inclinaison <= 25) f_inc = 1.0; 
+            else if (inclinaison > 25 && inclinaison <= 45) f_inc = 0.95;
+            else if (inclinaison > 45 && inclinaison <= 60) f_inc = 0.85;
+            else if (inclinaison > 60 && inclinaison <= 80) f_inc = 0.70;
+            else if (inclinaison > 80) f_inc = 0.50; 
+            
+            return (f_ori * f_inc).toFixed(2);
+        }
+
+        function gererOrientation() {
+            const inc = parseFloat(document.getElementById('inclinaison_manuelle').value) || 0;
+            const ori = document.getElementById('orientation_manuelle').value;
+            const facteurF = calculerFacteurF(inc, ori);
+            
+            const champRendementInclinaison = document.getElementById('r_inclinaison');
+            champRendementInclinaison.value = facteurF;
+            document.getElementById('affichage_facteur_f').innerText = facteurF;
+            
+            if (facteurF < 1.00) {
+                champRendementInclinaison.style.backgroundColor = "#fff3cd"; 
+            } else {
+                champRendementInclinaison.style.backgroundColor = "#e9ecef"; 
+            }
+            
             calculerTotal();
         }
 
@@ -409,7 +437,6 @@
             document.getElementById('puissanceEq').value = puissance;
             document.getElementById('nomCustomEq').style.display = (nom === "Autre") ? 'block' : 'none';
             
-            // Réinitialisation des champs pour éviter les erreurs de l'utilisateur
             document.getElementById('qtEq').value = 1;
             document.getElementById('joursEq').value = 7;
             document.getElementById('hEq').value = 6;
@@ -430,7 +457,6 @@
             
             const msgErreur = document.getElementById('msgErreurEq');
             
-            // Sécurités et contrôles
             if (h > 24) {
                 msgErreur.innerText = "Erreur : L'utilisation journalière ne peut pas excéder 24h.";
                 msgErreur.style.display = 'block';
@@ -449,7 +475,6 @@
             const total = (puissance * qt * h) * facteurJours;
             const totalNuit = (puissance * qt * hNuit) * facteurJours;
 
-            // Eviter les doublons et mettre à jour l'équipement existant
             const indexExistant = equipements.findIndex(e => e.nom === nom);
             
             if (indexExistant !== -1) {
@@ -486,7 +511,6 @@
         }
 
         function calculerTotal() {
-            // 1. Calcul du besoin
             let conso = 0;
             let conso_nuit_calc = 0;
             let puissance_max = 0;
@@ -502,7 +526,6 @@
                 document.getElementById('conso_nuit').value = Math.round(conso_nuit_calc) + " Wh/j";
             }
             
-            // 2. Rendement global
             const r_ond = parseFloat(document.getElementById('r_onduleur').value) || 1;
             const r_reg = parseFloat(document.getElementById('r_regulateur').value) || 1;
             const r_bat = parseFloat(document.getElementById('r_batteries').value) || 1;
@@ -515,13 +538,11 @@
             
             let e_produire = conso / rendement_global;
 
-            // 3. Dimensionnement Panneaux
             const irradiation = parseFloat(document.getElementById('irradiation').value) || 1;
             let p_crete = (e_produire / irradiation) * 1000;
             const p_panneau = parseFloat(document.getElementById('p_panneau').value) || 1;
             let nb_panneaux = Math.ceil(p_crete / p_panneau);
 
-            // 4. Dimensionnement Batteries
             const conso_nuit = conso_nuit_calc; 
             const jours_autonomie = parseFloat(document.getElementById('b_jours').value) || 0.5;
             const profondeur_decharge = parseFloat(document.getElementById('b_decharge').value) || 0.9;
@@ -538,7 +559,6 @@
             let nb_bat_serie = Math.ceil(tension_sys / tension_bat_unitaire);
             let nb_bat_para = Math.ceil(capa_batterie_endommagement / capa_unitaire);
             
-            // 5. Câblage 
             const rho = 0.017;
             const dist_po = parseFloat(document.getElementById('c_dist_po').value) || 8;
             const vmpp_panneau = parseFloat(document.getElementById('p_vmpp').value) || 72.9;
@@ -557,7 +577,6 @@
             sec_po = sections_commerciales.find(s => s >= sec_po) || sec_po;
             sec_ob = sections_commerciales.find(s => s >= sec_ob) || sec_ob;
 
-            // Mise à jour de l'affichage (Sticky Footer + Tableau Synthèse)
             document.getElementById('res-conso').innerText = Math.round(conso) + " Wh/j";
             document.getElementById('res-conso-nuit').innerText = "(dont Nuit: " + Math.round(conso_nuit_calc) + " Wh/j)";
             document.getElementById('res-stockage').innerText = Math.round(capa_batterie_endommagement) + " Ah";
