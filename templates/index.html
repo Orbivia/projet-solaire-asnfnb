@@ -61,7 +61,7 @@
         .synthesis-title { background-color: #27ae60 !important; border-bottom: 4px solid #1e8449 !important; }
         .synthesis-card { background-color: #e8f8f5; border: 2px solid #27ae60; border-top: none; }
         .synthesis-card h3 { color: #1e8449; margin-bottom: 5px;}
-        .result-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 5px 0; font-size: 0.9rem;}
+        .result-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #ccc; padding: 5px 0; font-size: 0.9rem;}
         .result-row strong { color: #2c3e50; }
         .bg-resultat { background-color: #4caf50; color: white;}
     </style>
@@ -163,11 +163,11 @@
                 </div>
                 <div>
                     <label>Jours / Semaine</label>
-                    <input type="number" id="joursEq" value="7" min="1" max="7">
+                    <input type="number" id="joursEq" value="7" min="1" max="7" oninput="if(this.value > 7) this.value = 7;">
                 </div>
                 <div>
                     <label>Heures total/j</label>
-                    <input type="number" id="hEq" value="6" min="0" max="24">
+                    <input type="number" id="hEq" value="6" min="0" max="24" oninput="if(this.value > 24) this.value = 24;">
                 </div>
                 <div>
                     <label>Dont nuit (h)</label>
@@ -224,15 +224,16 @@
                     <div><label>Prof. décharge (D)</label><input type="number" id="b_decharge" value="0.9" step="0.05" onchange="calculerTotal()"></div>
                     <div style="grid-column: span 2;"><label>Tension système choisie (V)</label>
                         <select id="b_tension_sys" onchange="calculerTotal()" style="background-color: #e0f7fa;">
-                            <option value="12">12 V</option>
+                            <option value="12" selected>12 V</option>
                             <option value="24">24 V</option>
-                            <option value="48" selected>48 V</option>
+                            <option value="48">48 V</option>
                         </select>
                     </div>
                     <div><label>Tension d'UNE batterie (V)</label>
                         <select id="b_tension_unitaire" onchange="calculerTotal()" style="background-color: #e0f7fa;">
-                            <option value="2">2 V</option>
                             <option value="12" selected>12 V</option>
+                            <option value="24">24 V</option>
+                            <option value="48">48 V</option>
                         </select>
                     </div>
                     <div><label>Capacité d'UNE batterie (Ah)</label><input type="number" id="b_capa_unitaire" value="100" onchange="calculerTotal()" style="background-color: #e0f7fa;"></div>
@@ -253,15 +254,19 @@
             
             <h3>Production requise</h3>
             <div class="result-row"><span>Puissance max simultanée (Onduleur)</span><strong id="cr-pmax" class="highlight" style="color: #d35400 !important;">0 W</strong></div>
-            <div class="result-row"><span>Consommation journalière</span><strong id="cr-conso">0 Wh/j</strong></div>
+            <div class="result-row"><span>Consommation journalière totale</span><strong id="cr-conso">0 Wh/j</strong></div>
+            <div class="result-row"><span style="font-size: 0.85rem; color: #7f8c8d;">↳ Dont consommation nuit</span><strong id="cr-conso-nuit" style="color: #d35400;">0 Wh/j</strong></div>
             <div class="result-row"><span>Énergie à produire (avec pertes)</span><strong id="cr-prod">0 Wh/j</strong></div>
             <div class="result-row"><span>Irradiation de référence</span><strong id="cr-irrad">0 Wh/m²/j</strong></div>
             
             <h3 style="margin-top: 15px;">Parc Panneaux</h3>
             <div class="result-row"><span>Puissance Crête Totale</span><strong id="cr-crete">0 Wc</strong></div>
-            <div class="result-row bg-resultat" style="padding: 10px; border-radius: 5px;">
-                <span>Nombre total de panneaux</span>
-                <strong id="cr-nb-panneaux" style="font-size: 1.2rem; color: white;">0</strong>
+            <div class="result-row bg-resultat" style="padding: 10px; border-radius: 5px; align-items: center;">
+                <span>Nombre total de panneaux (Pair)</span>
+                <div style="text-align: right;">
+                    <strong id="cr-nb-panneaux" style="font-size: 1.2rem; color: white; display:block;">0</strong>
+                    <span id="cr-nb-panneaux-exact" style="font-size: 0.75rem; color: #e8f8f5; display:block;">(Calcul exact: 0)</span>
+                </div>
             </div>
 
             <h3 style="margin-top: 15px;">Parc Batteries</h3>
@@ -526,27 +531,37 @@
                 document.getElementById('conso_nuit').value = Math.round(conso_nuit_calc) + " Wh/j";
             }
             
-            const r_ond = parseFloat(document.getElementById('r_onduleur').value) || 1;
-            const r_reg = parseFloat(document.getElementById('r_regulateur').value) || 1;
-            const r_bat = parseFloat(document.getElementById('r_batteries').value) || 1;
-            const r_cab = parseFloat(document.getElementById('r_cables').value) || 1;
-            const r_chal = parseFloat(document.getElementById('r_chaleur').value) || 1;
-            const r_incl = parseFloat(document.getElementById('r_inclinaison').value) || 1;
+            const r_ond = parseFloat(document.getElementById('r_onduleur').value) || 0.98;
+            const r_reg = parseFloat(document.getElementById('r_regulateur').value) || 0.98;
+            const r_bat = parseFloat(document.getElementById('r_batteries').value) || 0.80;
+            const r_cab = parseFloat(document.getElementById('r_cables').value) || 0.99;
+            const r_chal = parseFloat(document.getElementById('r_chaleur').value) || 0.9475;
+            const r_incl = parseFloat(document.getElementById('r_inclinaison').value) || 1.00;
             
             const rendement_global = r_ond * r_reg * r_bat * r_cab * r_chal * r_incl;
             document.getElementById('rendement_global_affichage').innerText = rendement_global.toFixed(2);
             
             let e_produire = conso / rendement_global;
 
-            const irradiation = parseFloat(document.getElementById('irradiation').value) || 1;
+            const irradiation = parseFloat(document.getElementById('irradiation').value) || 4597;
             let p_crete = (e_produire / irradiation) * 1000;
-            const p_panneau = parseFloat(document.getElementById('p_panneau').value) || 1;
-            let nb_panneaux = Math.ceil(p_crete / p_panneau);
+            const p_panneau = parseFloat(document.getElementById('p_panneau').value) || 435;
+            
+            // Calcul Panneaux : Exact vs Pair
+            let nb_panneaux_exact = Math.ceil(p_crete / p_panneau);
+            let nb_panneaux_pair = nb_panneaux_exact;
+            if (nb_panneaux_exact > 0 && nb_panneaux_exact % 2 !== 0) {
+                nb_panneaux_pair = nb_panneaux_exact + 1; // Arrondi au pair supérieur
+            }
+            if (conso === 0) {
+                nb_panneaux_exact = 0;
+                nb_panneaux_pair = 0;
+            }
 
             const conso_nuit = conso_nuit_calc; 
             const jours_autonomie = parseFloat(document.getElementById('b_jours').value) || 0.5;
             const profondeur_decharge = parseFloat(document.getElementById('b_decharge').value) || 0.9;
-            const tension_sys = parseFloat(document.getElementById('b_tension_sys').value) || 48;
+            const tension_sys = parseFloat(document.getElementById('b_tension_sys').value) || 12;
             const tension_bat_unitaire = parseFloat(document.getElementById('b_tension_unitaire').value) || 12;
             
             let energie_stockage = Math.max(conso_nuit, conso * jours_autonomie);
@@ -564,7 +579,8 @@
             const vmpp_panneau = parseFloat(document.getElementById('p_vmpp').value) || 72.9;
             const impp_panneau = parseFloat(document.getElementById('p_impp').value) || 5.97;
             
-            let i_panneaux = impp_panneau * nb_panneaux; 
+            // On utilise le nombre pair pour le dimensionnement du câble (la réalité de ce qui sera branché)
+            let i_panneaux = impp_panneau * nb_panneaux_pair; 
             let deltaV_po = vmpp_panneau * 0.03;
             let sec_po = deltaV_po > 0 ? ((rho * 2 * dist_po * i_panneaux) / deltaV_po).toFixed(2) : 0;
 
@@ -583,10 +599,14 @@
             document.getElementById('res-crete').innerText = Math.round(p_crete) + " Wc";
             
             document.getElementById('cr-conso').innerText = Math.round(conso) + " Wh/j";
+            document.getElementById('cr-conso-nuit').innerText = Math.round(conso_nuit_calc) + " Wh/j";
             document.getElementById('cr-prod').innerText = Math.round(e_produire) + " Wh/j";
             document.getElementById('cr-irrad').innerText = Math.round(irradiation) + " Wh/m²/j";
             document.getElementById('cr-crete').innerText = Math.round(p_crete) + " Wc";
-            document.getElementById('cr-nb-panneaux').innerText = conso > 0 ? nb_panneaux : 0;
+            
+            // Affichage des Panneaux Pair et Exact
+            document.getElementById('cr-nb-panneaux').innerText = nb_panneaux_pair;
+            document.getElementById('cr-nb-panneaux-exact').innerText = `(Calcul exact : ${nb_panneaux_exact})`;
             
             document.getElementById('cr-pmax').innerText = puissance_max + " W (Onduleur)";
             document.getElementById('cr-capa-theo').innerText = capa_batterie.toFixed(2) + " Ah";
@@ -598,7 +618,7 @@
             document.getElementById('cr-sec-po').innerText = sec_po + " mm²";
             document.getElementById('cr-sec-ob').innerText = sec_ob + " mm²";
 
-            genererSchema(nb_panneaux, nb_bat_para, nb_bat_serie, sec_po, sec_ob);
+            genererSchema(nb_panneaux_pair, nb_bat_para, nb_bat_serie, sec_po, sec_ob);
         }
 
         function genererSchema(nb_p, nb_b_para, nb_b_serie, sec_po, sec_ob) {
