@@ -86,7 +86,6 @@
             
             <div id="apiErrorMsg" class="msg-box msg-error" style="margin-top: 25px;"></div>
             
-            <!-- Grille compacte des 4 paramètres -->
             <div class="grid-params" style="background: none; border: none; padding: 0; margin-top: 22px;">
                 <div>
                     <label style="margin-top:0;">Stratégie (Mois)</label>
@@ -221,8 +220,6 @@
                 <summary>Stockage & Batteries</summary>
                 <div class="grid-params">
                     <div><label>Jours d'autonomie</label><input type="number" id="b_jours" value="0.5" step="0.1" onchange="calculerTotal()"></div>
-                    
-                    <!-- NOUVEAU MENU DEROULANT POUR LA PROFONDEUR DE DECHARGE (DoD) -->
                     <div><label>Techno. Batterie (DoD)</label>
                         <select id="b_decharge" onchange="calculerTotal()">
                             <option value="0.9" selected>Lithium (90%)</option>
@@ -230,7 +227,6 @@
                             <option value="0.5">Plomb Ouvert (50%)</option>
                         </select>
                     </div>
-
                     <div style="grid-column: span 2;"><label>Tension système choisie (V)</label>
                         <select id="b_tension_sys" onchange="calculerTotal()" style="background-color: #e0f7fa;">
                             <option value="12" selected>12 V</option>
@@ -240,9 +236,8 @@
                     </div>
                     <div><label>Tension d'UNE batterie (V)</label>
                         <select id="b_tension_unitaire" onchange="calculerTotal()" style="background-color: #e0f7fa;">
+                            <option value="2">2 V</option>
                             <option value="12" selected>12 V</option>
-                            <option value="24">24 V</option>
-                            <option value="48">48 V</option>
                         </select>
                     </div>
                     <div><label>Capacité d'UNE batterie (Ah)</label><input type="number" id="b_capa_unitaire" value="100" onchange="calculerTotal()" style="background-color: #e0f7fa;"></div>
@@ -279,8 +274,9 @@
             </div>
 
             <h3 style="margin-top: 15px;">Parc Batteries</h3>
+            <div class="result-row"><span>Énergie à stocker (Nuit + Jours sans soleil)</span><strong id="cr-energie-stock">0 Wh</strong></div>
             <div class="result-row"><span>Capacité nécessaire (théorique)</span><strong id="cr-capa-theo">0 Ah</strong></div>
-            <div class="result-row"><span>Capacité avec facteur dommage (0.8)</span><strong id="cr-capa-reelle">0 Ah</strong></div>
+            <div class="result-row"><span>Capacité avec marge de sécurité (0.8)</span><strong id="cr-capa-reelle">0 Ah</strong></div>
             <div class="result-row bg-resultat" style="padding: 10px; border-radius: 5px;">
                 <span>Batteries en parallèle x série</span>
                 <strong style="color:white;"><span id="cr-bat-para">0</span> P x <span id="cr-bat-serie">0</span> S = <span id="cr-bat-total">0</span> Total</strong>
@@ -556,26 +552,31 @@
             let p_crete = (e_produire / irradiation) * 1000;
             const p_panneau = parseFloat(document.getElementById('p_panneau').value) || 435;
             
-            // Calcul Panneaux : Exact vs Pair
             let nb_panneaux_exact = Math.ceil(p_crete / p_panneau);
             let nb_panneaux_pair = nb_panneaux_exact;
             if (nb_panneaux_exact > 0 && nb_panneaux_exact % 2 !== 0) {
-                nb_panneaux_pair = nb_panneaux_exact + 1; // Arrondi au pair supérieur
+                nb_panneaux_pair = nb_panneaux_exact + 1;
             }
             if (conso === 0) {
                 nb_panneaux_exact = 0;
                 nb_panneaux_pair = 0;
             }
 
+            // CORRECTION DE LA FORMULE SELON LE RETOUR DE LA MERE : E = Enuit + EJour * Autonomie
             const conso_nuit = conso_nuit_calc; 
-            const jours_autonomie = parseFloat(document.getElementById('b_jours').value) || 0.5;
+            const jours_autonomie = parseFloat(document.getElementById('b_jours').value) || 0;
+            
+            // L'énergie à stocker = La nuit immédiate + (la conso de 24h * le nombre de jours sans soleil)
+            let energie_stockage = conso_nuit + (conso * jours_autonomie);
+            
             const profondeur_decharge = parseFloat(document.getElementById('b_decharge').value) || 0.9;
             const tension_sys = parseFloat(document.getElementById('b_tension_sys').value) || 12;
             const tension_bat_unitaire = parseFloat(document.getElementById('b_tension_unitaire').value) || 12;
             
-            let energie_stockage = Math.max(conso_nuit, conso * jours_autonomie);
+            // CORRECTION DU DOUBLE 0.8 : On enlève 'r_bat' du diviseur de la capacité théorique
+            let capa_batterie = energie_stockage / (tension_sys * profondeur_decharge);
             
-            let capa_batterie = energie_stockage / (tension_sys * profondeur_decharge * r_bat);
+            // Application de l'unique marge de sécurité de 80% (facteur d'endommagement)
             let capa_batterie_endommagement = capa_batterie / 0.8; 
             
             const capa_unitaire = parseFloat(document.getElementById('b_capa_unitaire').value) || 100;
@@ -588,7 +589,6 @@
             const vmpp_panneau = parseFloat(document.getElementById('p_vmpp').value) || 72.9;
             const impp_panneau = parseFloat(document.getElementById('p_impp').value) || 5.97;
             
-            // On utilise le nombre pair pour le dimensionnement du câble (la réalité de ce qui sera branché)
             let i_panneaux = impp_panneau * nb_panneaux_pair; 
             let deltaV_po = vmpp_panneau * 0.03;
             let sec_po = deltaV_po > 0 ? ((rho * 2 * dist_po * i_panneaux) / deltaV_po).toFixed(2) : 0;
@@ -613,13 +613,16 @@
             document.getElementById('cr-irrad').innerText = Math.round(irradiation) + " Wh/m²/j";
             document.getElementById('cr-crete').innerText = Math.round(p_crete) + " Wc";
             
-            // Affichage des Panneaux Pair et Exact
             document.getElementById('cr-nb-panneaux').innerText = nb_panneaux_pair;
             document.getElementById('cr-nb-panneaux-exact').innerText = `(Calcul exact : ${nb_panneaux_exact})`;
             
             document.getElementById('cr-pmax').innerText = puissance_max + " W (Onduleur)";
+            
+            // Affichage de la nouvelle logique d'énergie
+            document.getElementById('cr-energie-stock').innerText = Math.round(energie_stockage) + " Wh";
             document.getElementById('cr-capa-theo').innerText = capa_batterie.toFixed(2) + " Ah";
             document.getElementById('cr-capa-reelle').innerText = capa_batterie_endommagement.toFixed(2) + " Ah";
+            
             document.getElementById('cr-bat-para').innerText = conso > 0 ? nb_bat_para : 0;
             document.getElementById('cr-bat-serie').innerText = conso > 0 ? nb_bat_serie : 0;
             document.getElementById('cr-bat-total').innerText = conso > 0 ? (nb_bat_para * nb_bat_serie) : 0;
